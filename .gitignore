@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+*.venv/
+venv/
+env/
+*.egg-info/
+
+# PyInstaller
+dist/
+build/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Docker
+qdrant_storage/
+*.log
+
+# Streamlit
+.streamlit/
+
+# Uvicorn
+*.pid
+
+# Other
+*.sqlite3
