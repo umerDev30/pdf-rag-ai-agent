@@ -6,101 +6,125 @@ All dependencies are managed using UV, the next-generation Python package manage
 
 🚀 Features
 
-📄 PDF Ingestion — Chunk and embed document content using sentence-transformers.
+📄 PDF Ingestion — Chunk and embed document content using SentenceTransformers
 
-🔍 Semantic Search — Store and retrieve document vectors from Qdrant.
+🔍 Semantic Search — Store and retrieve document vectors from Qdrant
 
-🤖 AI-Powered Answers — Use Gemini (via OpenAI endpoints) to generate contextual answers from retrieved text.
+🤖 AI-Powered Answers — Use Gemini (via OpenAI endpoints) to generate contextual answers
 
-⚙️ Event-Driven Workflow — Powered by Inngest for scalable function execution.
+⚙️ Event-Driven Workflow — Powered by Inngest for scalable function execution
 
-🌐 FastAPI backend and optional Streamlit frontend for interactive querying.
+🌐 FastAPI Backend and optional Streamlit Frontend for interactive querying
 
-🧩 Containerized Vector DB — Qdrant runs fully in Docker.
+🧩 Containerized Vector DB — Qdrant runs fully in Docker
 
-🧰 UV-based project — Modern, reproducible dependency management.
+🧰 UV-Based Project — Modern, reproducible dependency management
 
 🏗️ Tech Stack
 Component	Tool / Library
 Language	Python 3.12+
 Package Manager	UV
-
 Web Framework	FastAPI
-
-Vector Database	Qdrant
- (Docker)
+Vector Database	Qdrant (Docker)
 Embeddings	SentenceTransformers
-
-LLM	Google Gemini API
- (via OpenAI-compatible endpoints)
+LLM	Google Gemini API (via OpenAI-compatible endpoints)
 Event Handling	Inngest
-
 Frontend	Streamlit
 🧩 Project Structure
 rag-ai-agent/
 │
-├── main.py                 # FastAPI app entrypoint
-├── data_loader.py          # Loads and chunks PDF content
-├── vector_db.py            # Handles Qdrant operations
-├── custom_types.py         # Pydantic models for data
+├── __pycache__/            # Python cache files
+├── .venv/                  # Virtual environment created by UV
+│
+├── qdrant_storage/         # Local folder mounted to Docker for persistent Qdrant data
+├── uploads/                # Folder for uploaded PDFs
+│
 ├── .env                    # Environment variables
-├── Dockerfile / docker-run # Qdrant setup
-├── uv.lock / pyproject.toml# Dependency management via UV
+├── .gitignore              # Git ignore rules
+├── .python-version         # Python version specification (for UV/pyenv)
+│
+├── custom_types.py         # Pydantic models for data schemas
+├── data_loader.py          # Loads and chunks PDF content
+├── glossary.py             # Contains simplified definitions for technical terms
+├── main.py                 # FastAPI app entrypoint
+├── reset_qdrant.py         # Script to reset or clear Qdrant collections
+├── streamlit_app.py        # Streamlit frontend interface
+├── vector_db.py            # Handles Qdrant vector operations
+│
+├── pyproject.toml          # Project dependencies (UV)
+├── requirements.txt        # Optional standard dependency list
+├── uv.lock                 # Dependency lockfile for reproducibility
 └── README.md               # Project documentation
 
-⚙️ Setup Instructions
-1. Clone the repo
-git clone https://github.com/yourusername/rag-ai-agent.git
+
+🗂️ Note:
+
+qdrant_storage/ — created by Docker for persistent Qdrant data.
+
+uploads/ — stores uploaded PDFs for processing.
+
+reset_qdrant.py — helper to clear or reset your Qdrant database.
+
+⚙️ Setup & Run Commands (Sequential)
+1. Clone the Repository
+git clone https://github.com/umerDev30/rag-ai-agent.git
 cd rag-ai-agent
 
-2. Start Qdrant in Docker
+2. Start Qdrant via Docker
 docker run -d --name qdrantRagDb \
   -p 6333:6333 \
   -v "${PWD}/qdrant_storage:/qdrant/storage" \
   qdrant/qdrant
 
-3. Set up environment variables
 
-Create a .env file in the project root:
+The qdrant_storage folder is automatically created for persistent Qdrant data.
 
+3. Create the .env File
 GEMINI_API_KEY=your_gemini_key
 QDRANT_URL=http://localhost:6333
 
-4. Install dependencies using UV
+4. Initialize the Project
+uv init
+
+5. Install Dependencies
 uv sync
 
-5. Run the FastAPI server
-uvicorn main:app --reload
+6. Run the FastAPI Server
+uv run uvicorn main:app
 
-6. (Optional) Run Streamlit UI
-streamlit run app.py
+
+Server will start at: http://127.0.0.1:8000
+
+7. Start the Inngest Dev Server (for ingestion events)
+inngest dev -u http://127.0.0.1:8000/api/inngest --no-discovery
+
+8. (Optional) Launch Streamlit Frontend
+uv run streamlit run .\streamlit_app.py
+
+
+Streamlit will open at: http://localhost:8501
 
 🧠 How It Works
 
-PDF Upload → Chunking:
-data_loader.py splits documents into overlapping text chunks.
+PDF Upload → Chunking — data_loader.py splits documents into overlapping text chunks.
 
-Embedding → Storage:
-Chunks are embedded via SentenceTransformer and stored in Qdrant.
+Embedding → Storage — Chunks are embedded via SentenceTransformer and stored in Qdrant.
 
-User Query → Retrieval:
-The query is embedded and matched against stored vectors to retrieve context.
+User Query → Retrieval — The query is embedded and matched against stored vectors.
 
-Context → Generation:
-Retrieved text is passed to Gemini (via OpenAI endpoints) for generating human-like answers.
+Context → Generation — Retrieved text is passed to Gemini for generating answers.
 
-Response → User:
-The system returns a concise, context-aware answer.
+Response → User — Returns a concise, context-aware answer.
 
 🧩 Example Usage
 
 Query Example:
 
-"What does the document say about revenue growth?"
+“What does the document say about revenue growth?”
 
 Response:
 
-"The report indicates that revenue grew by 15% year-over-year due to strong Q2 performance."
+“The report indicates that revenue grew by 15% year-over-year due to strong Q2 performance.”
 
 🧱 Future Enhancements
 
