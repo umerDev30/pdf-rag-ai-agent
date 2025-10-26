@@ -12,7 +12,7 @@ from vector_db import QdrantStorage
 from custom_types import RAGChunkAndSrc, RAGUpsertResult, RAGSearchResult
 
 # Load environment variables from .env file (like API keys)
-load_dotenv()
+load_dotenv() 
 
 # Fetch Google Gemini API key from environment
 google_api_key = os.getenv("GEMINI_API_KEY")

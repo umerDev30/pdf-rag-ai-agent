@@ -33,37 +33,34 @@ All dependencies are managed using **UV**, the next-generation Python package ma
 
 ---
 
-## 🧩 Project Structure
-
+```
 rag-ai-agent/
 │
-├── pycache/ # Python cache files
-├── .venv/ # Virtual environment created by UV
+├── __pycache__/            # Python cache files
+├── .venv/                  # Virtual environment created by UV
 │
-├── qdrant_storage/ # Local folder mounted to Docker for persistent Qdrant data
-├── uploads/ # Folder for uploaded PDFs
+├── qdrant_storage/         # Local folder mounted to Docker for persistent Qdrant data
+├── uploads/                # Folder for uploaded PDFs
 │
-├── .env # Environment variables
-├── .gitignore # Git ignore rules
-├── .python-version # Python version specification (for UV/pyenv)
+├── .env                    # Environment variables
+├── .gitignore              # Git ignore rules
+├── .python-version         # Python version specification (for UV/pyenv)
 │
-├── custom_types.py # Pydantic models for data schemas
-├── data_loader.py # Loads and chunks PDF content
-├── glossary.py # Contains simplified definitions for technical terms
-├── main.py # FastAPI app entrypoint
-├── reset_qdrant.py # Script to reset or clear Qdrant collections
-├── streamlit_app.py # Streamlit frontend interface
-├── vector_db.py # Handles Qdrant vector operations
+├── custom_types.py         # Pydantic models for data schemas
+├── data_loader.py          # Loads and chunks PDF content
+├── glossary.py             # Contains simplified definitions for technical terms
+├── main.py                 # FastAPI app entrypoint
+├── reset_qdrant.py         # Script to reset or clear Qdrant collections
+├── streamlit_app.py        # Streamlit frontend interface
+├── vector_db.py            # Handles Qdrant vector operations
 │
-├── pyproject.toml # Project dependencies (UV)
-├── requirements.txt # Optional standard dependency list
-├── uv.lock # Dependency lockfile for reproducibility
-└── README.md # Project documentation
+├── pyproject.toml          # Project dependencies (UV)
+├── requirements.txt        # Optional standard dependency list
+├── uv.lock                 # Dependency lockfile for reproducibility
+└── README.md               # Project documentation
+```
 
-yaml
-Copy code
 
----
 
 ## 🗂️ Notes
 
@@ -76,12 +73,9 @@ Copy code
 ## ⚙️ Setup & Run Commands (Sequential)
 
 ### 1. Clone the Repository
-```bash
 git clone https://github.com/umerDev30/rag-ai-agent.git
 cd rag-ai-agent
 2. Start Qdrant via Docker
-bash
-Copy code
 docker run -d --name qdrantRagDb \
   -p 6333:6333 \
   -v "${PWD}/qdrant_storage:/qdrant/storage" \
@@ -89,31 +83,23 @@ docker run -d --name qdrantRagDb \
 The qdrant_storage folder is automatically created for persistent Qdrant data.
 
 3. Create the .env File
-bash
-Copy code
 GEMINI_API_KEY=your_gemini_key
 QDRANT_URL=http://localhost:6333
+
 4. Initialize the Project
-bash
-Copy code
 uv init
+
 5. Install Dependencies
-bash
-Copy code
 uv sync
+
 6. Run the FastAPI Server
-bash
-Copy code
 uv run uvicorn main:app
 ➡️ Server will start at: http://127.0.0.1:8000
 
 7. Start the Inngest Dev Server (for ingestion events)
-bash
-Copy code
 inngest dev -u http://127.0.0.1:8000/api/inngest --no-discovery
+
 8. (Optional) Launch Streamlit Frontend
-bash
-Copy code
 uv run streamlit run .\streamlit_app.py
 ➡️ Streamlit will open at: http://localhost:8501
 
