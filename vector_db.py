@@ -1,5 +1,5 @@
 from qdrant_client import QdrantClient
-from qdrant_client.models import VectorParams, Distance, PointStruct
+from qdrant_client.models import VectorParams, Distance, PointStruct, Filter, FieldCondition, MatchValue
 
 class QdrantStorage:
     def __init__(self, url: str = "http://localhost:6333", collection: str = "docs", dims: int = 384):
@@ -7,55 +7,60 @@ class QdrantStorage:
         Initialize and manage connection to a Qdrant vector database.
         Creates a new collection if one does not exist.
         """
-        # Connect to Qdrant instance (default localhost)
         self.client = QdrantClient(url=url, timeout=30)
         self.collection = collection
 
-        # Check if the collection exists — if not, create one
+        # Create collection if missing
         if not self.client.collection_exists(self.collection):
             self.client.create_collection(
                 collection_name=self.collection,
                 vectors_config=VectorParams(
-                    size=dims,              # Vector size (dimension of embeddings)
-                    distance=Distance.COSINE  # Use cosine similarity for comparisons
+                    size=dims,
+                    distance=Distance.COSINE
                 )
             )
 
-    def upsert_vectors(self, ids: list[int], vectors: list[list[float]], payloads: list[dict]):
+    def upsert_vectors(self, ids: list[int], vectors: list[list[float]], payloads: list[dict], source_id: str = None):
         """
-        Insert or update vectors with associated metadata (payloads) into the Qdrant collection.
-        Each vector gets an ID, embedding vector, and related payload.
+        Insert or update vectors into the collection, tagging them with a source_id (e.g., PDF name).
         """
-        # Combine each vector, id, and payload into a Qdrant PointStruct
+        # Attach source_id to payloads if provided
+        if source_id:
+            for p in payloads:
+                p["source_id"] = source_id
+
         points = [
             PointStruct(id=ids[i], vector=vectors[i], payload=payloads[i])
             for i in range(len(ids))
         ]
 
-        # Send the data to Qdrant to insert or update existing points
         self.client.upsert(
             collection_name=self.collection,
             points=points
         )
 
-    def search_vectors(self, query_vector: list[float], top_k: int = 5):
+    def search_vectors(self, query_vector: list[float], top_k: int = 5, source_id: str = None):
         """
-        Search for the most similar vectors to a given query vector.
-        Returns both the matching text chunks (contexts) and their sources.
+        Search for most similar vectors to query_vector.
+        Optionally filter results by source_id to get answers from a specific PDF only.
         """
-        # Perform similarity search in Qdrant
+        search_filter = None
+        if source_id:
+            search_filter = Filter(
+                must=[FieldCondition(key="source_id", match=MatchValue(value=source_id))]
+            )
+
         results = self.client.search(
             collection_name=self.collection,
             query_vector=query_vector,
-            with_payload=True,  # Include stored metadata (text, source)
-            limit=top_k          # Number of top matches to return
+            query_filter=search_filter,
+            with_payload=True,
+            limit=top_k
         )
 
-        # Initialize result containers
         contexts = []
         sources = set()
 
-        # Extract text and source info from search results
         for res in results:
             payload = getattr(res, 'payload', {}) or {}
             text = payload.get('text', '')
@@ -65,5 +70,4 @@ class QdrantStorage:
                 if source:
                     sources.add(source)
 
-        # Return matched chunks and unique source list
         return {"contexts": contexts, "sources": list(sources)}
