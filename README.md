@@ -75,6 +75,7 @@ rag-ai-agent/
 ### 1. Clone the Repository
 git clone https://github.com/umerDev30/rag-ai-agent.git
 cd rag-ai-agent
+
 2. Start Qdrant via Docker
 docker run -d --name qdrantRagDb \
   -p 6333:6333 \
